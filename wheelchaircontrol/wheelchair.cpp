@@ -164,7 +164,7 @@ void Wheelchair::ToFSafe_thread()
 
     if(curr_vel < 0.5 &&((2 * maxDecelerationSlow*(*LFF) < curr_vel*curr_vel*1000*1000 ||
                         2 * maxDecelerationSlow*(*RFF) < curr_vel*curr_vel*1000*1000) &&
-                       (*LFF < 1000 || *RFF < 1000)) /*||
+                       (*LFF < 800 || *RFF < 800)) /*||
             550 > *LFF || 550 > *RFF */) {
 
         if(x->read() > def) {
@@ -186,7 +186,7 @@ void Wheelchair::ToFSafe_thread()
 
    else if(curr_vel > 0.5 && curr_vel < 0.9 &&((2 * maxDecelerationFast*(*LFF) < curr_vel*curr_vel*1000*1000 ||
                                  2 * maxDecelerationFast*(*RFF) < curr_vel*curr_vel*1000*1000) &&
-                                (*LFF < 1500 || *RFF < 1500)) /*|| 550 > *LFF || 550 > *RFF */) {
+                                (*LFF < 1300 || *RFF < 1300)) /*|| 550 > *LFF || 550 > *RFF */) {
             if(x->read() > def) {
                 x->write(def);
                 forwardSafety = 1;          // You cannot move forward
@@ -282,31 +282,31 @@ void Wheelchair::ToFSafe_thread()
 //        runningAverage[i] = ((runningAverage[i]*(4) + ToFV[(i*3)+1]) / 5);
 //    }
 
-/*    runningAverage[2] = ((runningAverage[2]*(4) + (*LBD)) / 5);
+   runningAverage[2] = ((runningAverage[2]*(4) + (*LBD)) / 5);
     runningAverage[3] = ((runningAverage[3]*(4) + (*RBD)) / 5);
 
-    int (*LBB) = ToFV[5];//back left looking forward
-    int (*RBB) = ToFV[0];//back right looking forward
-    if(curr_vel < 1 &&((2 * maxDecelerationSlow*(*LBB) < curr_vel*curr_vel*1000*1000 ||
+    //int (*LBB) = ToFV[5];//back left looking forward
+    //int (*RBB) = ToFV[0];//back right looking forward
+    if(-curr_vel < 1 &&((2 * maxDecelerationSlow*(*LBB) < curr_vel*curr_vel*1000*1000 ||
                         2 * maxDecelerationSlow*(*RBB) < curr_vel*curr_vel*1000*1000) &&
                        ((*LBB) < 1500 || (*RBB) < 1500)) ||
             550 > (*LBB) || 550 > (*RBB)) {
-        if(x->read() > def) {
+        //if(x->read() > def) {
             x->write(def);
             backwardSafety = 1;          // You cannot move backwards
             out->printf("Enabled Backward Safety, Case 1\n");
-        }
+        //}
     }
 
-    else if(curr_vel > 1 &&((2 * maxDecelerationFast*(*LFS) < curr_vel*curr_vel*1000*1000 ||
-                             2 * maxDecelerationFast*(*RFS) < curr_vel*curr_vel*1000*1000) &&
+    else if(-curr_vel > 1 &&((2 * maxDecelerationFast*(*LBB) < curr_vel*curr_vel*1000*1000 ||
+                             2 * maxDecelerationFast*(*RBB) < curr_vel*curr_vel*1000*1000) &&
                             ((*LBB) < 1500 || (*RBB) < 1500)) ||
             550 > (*LBB) || 550 > (*RBB)) {
-        if(x->read() > def) {
+        //if(x->read() > def) {
             x->write(def);
             backwardSafety = 1;          // You cannot move backwards
             out->printf("Enabled Backward Safety, Case 2\n");
-        }
+        //}
     }
 
     else if ((runningAverage[2] > outlierToF[2]) || (runningAverage[3] > outlierToF[3])) {
@@ -347,8 +347,8 @@ void Wheelchair::ToFSafe_thread()
     After clearing the front side and moving forward, check if can clear the back
     when turning */
 
-/*    //When either sensors too close to the wall, can't turn
-    if((*LFS) <= minWallLength) {
+    //When either sensors too close to the wall, can't turn
+    if((*LFS <= minWallLength) || (*LBS <= minWallLength)) {
         leftSafety = 1;
         out->printf("Detecting wall to the left!\n");
     }
@@ -356,7 +356,7 @@ void Wheelchair::ToFSafe_thread()
         leftSafety = 0;
     }
     
-    if((*RFS) <= minWallLength) {
+    if((*RFS <= minWallLength) || (*RBS <= minWallLength)) {
         rightSafety = 1;
         out->printf("Detecting wall to the right!\n");
     }
@@ -368,26 +368,28 @@ void Wheelchair::ToFSafe_thread()
 
     //Scenario 1: Wheelchair close to right side wall and you want to turn left.
     //The back right side sensor say too close and corner get bumped
-    if((*RBS) <= minWallLength) {
-        leftSafety = 1;
-        out->printf("Detecting wall to the right at back! Don't turn left. \n");
-    }
-    else {
-        leftSafety = 0;
-    }
-
-    //Scenario 2: Wheelchair close to left side wall and you want to turn right.
-    //The back left side sensor say too close and corner get bumped
-     if((*LBS) <= minWallLength) {
-        rightSafety = 1;
-        out->printf("Detecting wall to the left at back! Don't turn right. \n");
-    }
-    else {
-        rightSafety = 0;
-    }
+//    if((*LBS <= minWallLength) {
+//        leftSafety = 1;
+//        out->printf("Detecting wall to the right at back! Don't turn left. \n");
+//    }
+//    else {
+//        leftSafety = 0;
+//    }
+//
+//    //Scenario 2: Wheelchair close to left side wall and you want to turn right.
+//    //The back left side sensor say too close and corner get bumped
+//     if((*RBS) <= minWallLength) {
+//        rightSafety = 1;
+//        out->printf("Detecting wall to the left at back! Don't turn right. \n");
+//    }
+//    else {
+//        rightSafety = 0;
+//    }
 
     //Below for the angled sensor when detect something in the blindspot between
     //the side sensors
+
+    /*
     if((*LFA) <= 100000) {
         leftSafety = 1;
         //out->printf("Blindspot on the left side\n");
@@ -403,7 +405,7 @@ void Wheelchair::ToFSafe_thread()
     else{
         rightSafety = 0;
     }
-    
+    */
     /*Check whether safe to keep turning
     Know the exact moment you can stop the chair going at a certain speed before
     its too late*/
@@ -545,8 +547,8 @@ void Wheelchair::forward()
         x->write(high);
         y->write(def+1.5*offset);
 
-        //double diff = fmod((wheel->getDistance(53.975)) - (wheelS->getDistance(53.975)), 100);
-        //y->write(def-(diff/1000));
+        double diff = fmod((wheel->getDistance(53.975)) - (wheelS->getDistance(53.975)), 50);
+        y->write(def-(diff/1000));
 
     }
     //out->printf("%f, %f\r\n", curr_pos, wheelS->getDistance(53.975));
@@ -559,7 +561,7 @@ void Wheelchair::backward()
 {
     if (backwardSafety == 0) {
         x->write(low);
-        y->write(def);
+        y->write(def+1.5*offset);
     }
     out->printf("%f, %f\r\n", curr_vel, curr_velS);
 }
