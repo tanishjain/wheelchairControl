@@ -17,7 +17,7 @@ DigitalIn pt3(PF_12, PullUp);        		// Pull up resistors to read analog signa
 DigitalIn pt4(PF_13, PullUp);
 
 int max_velocity;
-
+//Test code for GD
 /**************************************************************************
  *        Variables and Pins for Watchdog and Emergency Button            *
  **************************************************************************/
